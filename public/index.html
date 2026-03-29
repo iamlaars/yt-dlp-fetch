@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FETCH — Video Downloader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0c0c0f;
+    --surface: #13131a;
+    --surface2: #1a1a24;
+    --border: #2a2a38;
+    --accent: #f0e040;
+    --accent2: #ff4d6d;
+    --text: #e8e8f0;
+    --muted: #6b6b88;
+    --success: #3dfaad;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px 80px;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(240,224,64,0.07) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.015) 80px),
+      repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.015) 80px);
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  .logo {
+    font-size: clamp(52px, 10vw, 88px);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--accent);
+    text-shadow: 0 0 60px rgba(240,224,64,0.25);
+    position: relative;
+  }
+
+  .logo::after {
+    content: '↓';
+    display: block;
+    font-size: 0.45em;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .tagline {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-top: 10px;
+  }
+
+  /* Main card */
+  .card {
+    width: 100%;
+    max-width: 680px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  /* URL Input section */
+  .url-section {
+    padding: 28px 28px 24px;
+  }
+
+  .input-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .url-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .url-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 13px 16px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .url-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(240,224,64,0.08);
+  }
+
+  .url-input::placeholder { color: var(--muted); }
+
+  .btn {
+    background: var(--accent);
+    color: #0c0c0f;
+    border: none;
+    border-radius: 3px;
+    padding: 13px 20px;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn:hover { background: #fff0a0; transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .btn-ghost:hover { background: var(--surface2); border-color: var(--accent); transform: none; }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 28px;
+  }
+
+  /* Info section */
+  .info-section {
+    padding: 24px 28px;
+    display: none;
+  }
+
+  .info-section.visible { display: block; }
+
+  .video-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .thumbnail {
+    width: 120px;
+    height: 68px;
+    object-fit: cover;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--surface2);
+  }
+
+  .meta-text { flex: 1; min-width: 0; }
+
+  .video-title {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 6px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .meta-details {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .meta-details span { display: flex; align-items: center; gap: 4px; }
+
+  /* Format picker */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .quick-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .quick-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--mono);
+  }
+
+  .quick-btn:hover { border-color: var(--accent); background: rgba(240,224,64,0.05); }
+
+  .quick-btn.selected {
+    border-color: var(--accent);
+    background: rgba(240,224,64,0.1);
+  }
+
+  .qb-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+  }
+
+  .qb-sub {
+    font-size: 9px;
+    color: var(--muted);
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* Formats table */
+  .formats-toggle {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    letter-spacing: 0.1em;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .formats-table-wrap {
+    display: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 260px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 16px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .formats-table-wrap::-webkit-scrollbar { width: 6px; }
+  .formats-table-wrap::-webkit-scrollbar-track { background: transparent; }
+  .formats-table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .formats-table-wrap::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  .formats-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .formats-table-wrap.open { display: block; }
+
+  .formats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+
+  .formats-table th {
+    background: var(--surface2);
+    color: var(--muted);
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .formats-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid rgba(42,42,56,0.5);
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  .formats-table tr:last-child td { border-bottom: none; }
+
+  .formats-table tr { cursor: pointer; transition: background 0.1s; }
+  .formats-table tr:hover td { background: var(--surface2); }
+  .formats-table tr.selected td { background: rgba(240,224,64,0.07); }
+  .formats-table tr.selected td:first-child { border-left: 2px solid var(--accent); }
+
+  .badge {
+    display: inline-block;
+    font-size: 8px;
+    padding: 1px 5px;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .badge-v { background: rgba(63,199,255,0.15); color: #3fc7ff; }
+  .badge-a { background: rgba(61,250,173,0.15); color: var(--success); }
+  .badge-va { background: rgba(240,224,64,0.15); color: var(--accent); }
+
+  /* Download section */
+  .dl-section {
+    padding: 0 28px 28px;
+    display: none;
+  }
+
+  .dl-section.visible { display: block; }
+
+  .dl-btn {
+    width: 100%;
+    padding: 16px;
+    font-size: 15px;
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dl-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+
+  .dl-btn:hover::before { transform: translateX(100%); }
+
+  /* Progress */
+  .progress-section {
+    padding: 0 28px 28px;
+    display: none;
+  }
+
+  .progress-section.visible { display: block; }
+
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    height: 4px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.3s;
+    box-shadow: 0 0 8px rgba(240,224,64,0.5);
+  }
+
+  .progress-bar.indeterminate {
+    width: 30%;
+    animation: indeterminate 1.5s ease-in-out infinite;
+  }
+
+  @keyframes indeterminate {
+    0% { transform: translateX(-150%); }
+    100% { transform: translateX(450%); }
+  }
+
+  .log-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    max-height: 120px;
+    overflow-y: auto;
+    line-height: 1.6;
+  }
+
+  .log-box .log-line { margin-bottom: 2px; }
+  .log-box .log-line.success { color: var(--success); }
+  .log-box .log-line.error { color: var(--accent2); }
+
+  /* Status */
+  .status {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1.2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  /* Loader spinner */
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 20px;
+    font-family: var(--mono);
+    font-size: 12px;
+    z-index: 100;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--success); color: var(--success); }
+  .toast.error { border-color: var(--accent2); color: var(--accent2); }
+
+  /* Responsive */
+  @media (max-width: 500px) {
+    .url-row { flex-direction: column; }
+    .video-meta { flex-direction: column; }
+    .thumbnail { width: 100%; height: 160px; }
+    .quick-options { grid-template-columns: 1fr 1fr; }
+  }
+
+  .powered {
+    margin-top: 32px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    letter-spacing: 0.1em;
+  }
+  .powered a { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">FETCH</div>
+  <p class="tagline">powered by yt-dlp · supports 1000+ sites</p>
+</header>
+
+<div class="card" id="mainCard">
+  <!-- URL Input -->
+  <div class="url-section">
+    <label class="input-label" for="urlInput">Video URL</label>
+    <div class="url-row">
+      <input class="url-input" id="urlInput" type="text" placeholder="https://youtube.com/watch?v=..." autocomplete="off" spellcheck="false">
+      <button class="btn" id="fetchBtn" onclick="fetchInfo()">Analyse</button>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Video info -->
+  <div class="info-section" id="infoSection">
+    <div class="video-meta">
+      <img class="thumbnail" id="thumbnail" src="" alt="">
+      <div class="meta-text">
+        <div class="video-title" id="videoTitle">—</div>
+        <div class="meta-details" id="metaDetails"></div>
+      </div>
+    </div>
+
+    <div class="section-label">Format</div>
+
+    <div class="quick-options" id="quickOptions">
+      <div class="quick-btn selected" data-mode="best" onclick="selectQuick(this,'best')">
+        <span class="qb-label">Best</span>
+        <span class="qb-sub">MP4 · best quality</span>
+      </div>
+      <div class="quick-btn" data-mode="1080" onclick="selectQuick(this,'1080')">
+        <span class="qb-label">1080p</span>
+        <span class="qb-sub">Full HD · MP4</span>
+      </div>
+      <div class="quick-btn" data-mode="audio" onclick="selectQuick(this,'audio')">
+        <span class="qb-label">Audio</span>
+        <span class="qb-sub">MP3 · audio only</span>
+      </div>
+    </div>
+
+    <button class="formats-toggle" onclick="toggleFormats()">▸ show all formats</button>
+    <div class="formats-table-wrap" id="formatsTable">
+      <table class="formats-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Extension</th>
+            <th>Resolution</th>
+            <th>Type</th>
+            <th>Note</th>
+            <th>Size</th>
+          </tr>
+        </thead>
+        <tbody id="formatRows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Download button -->
+  <div class="dl-section" id="dlSection">
+    <button class="btn dl-btn" id="dlBtn" onclick="startDownload()">↓ Download</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-section" id="progressSection">
+    <div class="status" id="statusText"><span class="dot"></span> <span id="statusMsg">Preparing...</span></div>
+    <div class="progress-bar-wrap"><div class="progress-bar indeterminate" id="progressBar"></div></div>
+    <div class="log-box" id="logBox"></div>
+  </div>
+</div>
+
+<div class="powered">runs on <a href="https://github.com/yt-dlp/yt-dlp" target="_blank">yt-dlp</a> · self-hosted</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '';  // same origin
+
+let videoInfo = null;
+let selectedMode = 'best';
+let selectedFormatId = null;
+let formatsOpen = false;
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+function formatDuration(sec) {
+  if (!sec) return '';
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return h ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function formatSize(bytes) {
+  if (!bytes) return '?';
+  if (bytes > 1e9) return (bytes/1e9).toFixed(1) + ' GB';
+  if (bytes > 1e6) return (bytes/1e6).toFixed(0) + ' MB';
+  return (bytes/1e3).toFixed(0) + ' KB';
+}
+
+function formatViews(n) {
+  if (!n) return '';
+  if (n > 1e6) return (n/1e6).toFixed(1) + 'M views';
+  if (n > 1e3) return (n/1e3).toFixed(0) + 'K views';
+  return n + ' views';
+}
+
+async function fetchInfo() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) return showToast('Enter a URL first', 'error');
+
+  const btn = document.getElementById('fetchBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  // Hide previous results
+  document.getElementById('infoSection').classList.remove('visible');
+  document.getElementById('dlSection').classList.remove('visible');
+  document.getElementById('progressSection').classList.remove('visible');
+
+  try {
+    const res = await fetch(`${API}/api/info?url=${encodeURIComponent(url)}`);
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || 'Failed');
+
+    videoInfo = data;
+    renderInfo(data);
+
+    document.getElementById('infoSection').classList.add('visible');
+    document.getElementById('dlSection').classList.add('visible');
+  } catch (e) {
+    showToast('Error: ' + e.message, 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Analyse';
+}
+
+function renderInfo(data) {
+  const thumb = document.getElementById('thumbnail');
+  if (data.thumbnail) { thumb.src = data.thumbnail; thumb.style.display = ''; }
+  else thumb.style.display = 'none';
+
+  document.getElementById('videoTitle').textContent = data.title || 'Unknown';
+
+  const det = document.getElementById('metaDetails');
+  det.innerHTML = [
+    data.uploader ? `<span>👤 ${data.uploader}</span>` : '',
+    data.duration ? `<span>⏱ ${formatDuration(data.duration)}</span>` : '',
+    data.view_count ? `<span>👁 ${formatViews(data.view_count)}</span>` : '',
+  ].filter(Boolean).join('');
+
+  // Render format rows
+  const tbody = document.getElementById('formatRows');
+  tbody.innerHTML = '';
+  (data.formats || []).forEach(f => {
+    const tr = document.createElement('tr');
+    tr.dataset.formatId = f.format_id;
+
+    let badge = '';
+    if (f.hasVideo && f.hasAudio) badge = '<span class="badge badge-va">V+A</span>';
+    else if (f.hasVideo) badge = '<span class="badge badge-v">Video</span>';
+    else badge = '<span class="badge badge-a">Audio</span>';
+
+    tr.innerHTML = `
+      <td>${f.format_id}</td>
+      <td>${f.ext}</td>
+      <td>${f.resolution || '—'}</td>
+      <td>${badge}</td>
+      <td>${f.format_note || '—'}</td>
+      <td>${formatSize(f.filesize)}</td>
+    `;
+
+    tr.onclick = () => selectFormat(tr, f.format_id);
+    tbody.appendChild(tr);
+  });
+}
+
+function selectQuick(el, mode) {
+  document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMode = mode;
+  selectedFormatId = null;
+  // Deselect table rows
+  document.querySelectorAll('#formatRows tr').forEach(r => r.classList.remove('selected'));
+}
+
+function selectFormat(tr, id) {
+  document.querySelectorAll('#formatRows tr').forEach(r => r.classList.remove('selected'));
+  tr.classList.add('selected');
+  selectedFormatId = id;
+  selectedMode = 'custom';
+  document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('selected'));
+}
+
+function toggleFormats() {
+  formatsOpen = !formatsOpen;
+  document.getElementById('formatsTable').classList.toggle('open', formatsOpen);
+  document.querySelector('.formats-toggle').textContent = formatsOpen ? '▾ hide formats' : '▸ show all formats';
+}
+
+function startDownload() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url || !videoInfo) return;
+
+  // Build request body
+  const body = { url };
+
+  if (selectedMode === 'audio') {
+    body.audioOnly = true;
+  } else if (selectedMode === '1080') {
+    body.format_id = 'bestvideo[height<=1080]+bestaudio/bestvideo[height<=1080]/best';
+  } else if (selectedMode === 'custom' && selectedFormatId) {
+    body.format_id = selectedFormatId;
+  }
+  // 'best' sends nothing — server uses bestvideo+bestaudio/best
+
+  body.filename = videoInfo.title;
+
+  document.getElementById('dlSection').classList.remove('visible');
+  document.getElementById('infoSection').classList.remove('visible');
+  document.getElementById('progressSection').classList.add('visible');
+
+  const logBox = document.getElementById('logBox');
+  const bar = document.getElementById('progressBar');
+  const statusMsg = document.getElementById('statusMsg');
+  logBox.innerHTML = '';
+  bar.style.width = '0%';
+  bar.classList.add('indeterminate');
+
+  function log(msg, cls = '') {
+    const line = document.createElement('div');
+    line.className = 'log-line ' + cls;
+    line.textContent = msg;
+    logBox.appendChild(line);
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  fetch(`${API}/api/download`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(res => {
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    function pump() {
+      return reader.read().then(({ done, value }) => {
+        if (done) return;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        lines.forEach(line => {
+          if (!line.startsWith('data:')) return;
+          try {
+            const event = JSON.parse(line.slice(5).trim());
+            if (event.type === 'progress') {
+              log(event.message);
+              // Update status bar text with any meaningful line
+              const msg = event.message.trim();
+              if (msg && !msg.startsWith(':')) {
+                const eta = msg.match(/ETA\s+(\S+)/);
+                const pct = msg.match(/(\d+(?:\.\d+)?)%/);
+                if (pct) {
+                  bar.classList.remove('indeterminate');
+                  bar.style.width = parseFloat(pct[1]) + '%';
+                  statusMsg.textContent = `Downloading... ${pct[1]}%` + (eta ? ` · ETA ${eta[1]}` : '');
+                } else if (msg.includes('[download]') || msg.includes('[ffmpeg]') || msg.includes('[Merger]') || msg.includes('Destination')) {
+                  statusMsg.textContent = msg.replace(/^\[.*?\]\s*/, '').slice(0, 60);
+                } else if (msg === 'Starting yt-dlp...') {
+                  statusMsg.textContent = 'Starting...';
+                }
+              }
+            } else if (event.type === 'done') {
+              bar.classList.remove('indeterminate');
+              bar.style.width = '100%';
+              statusMsg.textContent = 'Done! Saving file...';
+              log('✓ ' + (event.filename || 'file'), 'success');
+              // Trigger browser file download via the token URL
+              window.location.href = `${API}/api/file/${event.token}`;
+              setTimeout(() => {
+                document.getElementById('progressSection').classList.remove('visible');
+                document.getElementById('infoSection').classList.add('visible');
+                document.getElementById('dlSection').classList.add('visible');
+                showToast('Download started!', 'success');
+              }, 1500);
+            } else if (event.type === 'error') {
+              log('✗ ' + event.message, 'error');
+              statusMsg.textContent = 'Error — check logs above';
+              bar.classList.remove('indeterminate');
+              bar.style.width = '0%';
+              setTimeout(() => {
+                document.getElementById('progressSection').classList.remove('visible');
+                document.getElementById('infoSection').classList.add('visible');
+                document.getElementById('dlSection').classList.add('visible');
+              }, 3000);
+            }
+          } catch {}
+        });
+
+        return pump();
+      });
+    }
+
+    return pump();
+  }).catch(err => {
+    log('✗ Network error: ' + err.message, 'error');
+    statusMsg.textContent = 'Connection error';
+    bar.classList.remove('indeterminate');
+  });
+}
+
+// Handle enter key
+document.getElementById('urlInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') fetchInfo();
+});
+
+// Handle paste and auto-fetch
+document.getElementById('urlInput').addEventListener('paste', e => {
+  setTimeout(() => {
+    const val = document.getElementById('urlInput').value.trim();
+    if (val.startsWith('http')) fetchInfo();
+  }, 50);
+});
+</script>
+</body>
+</html>
