@@ -3,6 +3,9 @@
 A self-hosted video downloader powered by yt-dlp, packaged as a Docker container.
 Supports YouTube, Vimeo, TikTok, Twitter/X, and 1000+ other sites.
 
+> [!Warning]
+> This repo has been heavily generated with Claude.
+
 ## Requirements
 
 - **Docker** + **Docker Compose**
