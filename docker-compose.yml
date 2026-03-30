@@ -7,5 +7,5 @@ services:
     volumes:
       - ./downloads:/app/downloads
       # Cookies from webbrowser if needed
-      - ./cookies.txt/app/cookies.txt
+      - ./cookies.txt:/app/cookies.txt
     restart: unless-stopped
