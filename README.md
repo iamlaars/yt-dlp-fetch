@@ -53,6 +53,6 @@ docker compose exec fetch yt-dlp -U
 
 ## Notes
 
-- Downloaded files are temporarily stored in the container's /tmp and streamed to the browser.
+- Downloaded files stored in the container's /app/downloads and streamed to the browser.
 - The ./downloads volume mount is available if you want to keep files on the host.
 - To run on a different port, change "4242:4242" in docker-compose.yml.
