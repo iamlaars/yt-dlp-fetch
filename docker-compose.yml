@@ -1,0 +1,11 @@
+services:
+  fetch:
+    image: ghcr.io/iamlaars/yt-dlp-fetch:main
+    container_name: fetch-ytdlp
+    ports:
+      - "4242:4242"
+    volumes:
+      - ./downloads:/app/downloads
+      # Cookies from webbrowser if needed
+      - ./cookies.txt/app/cookies.txt
+    restart: unless-stopped
