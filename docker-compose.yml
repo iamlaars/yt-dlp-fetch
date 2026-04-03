@@ -8,4 +8,13 @@ services:
       - ./downloads:/app/downloads
       # Cookies from webbrowser if needed
       - ./cookies.txt:/app/cookies.txt
+    environment:
+      - AUTH_SECRET=${AUTH_SECRET}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - AUTHENTIK_CLIENT_ID=${AUTHENTIK_CLIENT_ID:-}
+      - AUTHENTIK_CLIENT_SECRET=${AUTHENTIK_CLIENT_SECRET:-}
+      - AUTHENTIK_ISSUER=${AUTHENTIK_ISSUER:-}
     restart: unless-stopped
