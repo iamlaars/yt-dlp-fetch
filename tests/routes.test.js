@@ -10,7 +10,7 @@ import { getSession } from '@auth/express'
 import request from 'supertest'
 
 async function getApp() {
-  // Re-import fresh each time to pick up the mock
+  // Module is cached by ESM; mock is hoisted and applies to all imports
   const { app } = await import('../server.js')
   return app
 }

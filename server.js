@@ -35,7 +35,7 @@ app.use('/auth', ExpressAuth(authConfig))
 async function requireAuth(req, res, next) {
   const session = await getSession(req, authConfig)
   if (!session?.user) {
-    if (req.path.startsWith('/api/')) {
+    if (req.originalUrl.startsWith('/api/')) {
       return res.status(401).json({ error: 'Unauthorized' })
     }
     return res.redirect('/login')
@@ -55,7 +55,7 @@ app.get('/api/providers', (_req, res) => {
 })
 
 // Protected: session info
-app.get('/api/session', requireAuth, (req, res) => {
+app.get('/api/session', requireAuth, (_req, res) => {
   const { name, email, image } = res.locals.session.user
   res.json({ name, email, image })
 })
