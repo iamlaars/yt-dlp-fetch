@@ -45,4 +45,5 @@ export function getActiveProviderNames() {
 
 export const authConfig = {
   providers: activeProviders,
+  trustHost: true,
 }
