@@ -54,6 +54,10 @@
       gap: 0.75rem;
     }
 
+    .providers form {
+      width: 100%;
+    }
+
     .btn {
       display: block;
       width: 100%;
@@ -67,6 +71,7 @@
       text-decoration: none;
       cursor: pointer;
       transition: background 0.15s, border-color 0.15s;
+      font-family: inherit;
     }
 
     .btn:hover {
@@ -117,11 +122,15 @@
         container.innerHTML = ''
         for (const provider of providers) {
           const label = providerNames[provider.id] || provider.name
-          const a = document.createElement('a')
-          a.className = 'btn'
-          a.href = `/auth/signin/${provider.id}`
-          a.textContent = `Sign in with ${label}`
-          container.appendChild(a)
+          const form = document.createElement('form')
+          form.action = `/auth/signin/${provider.id}`
+          form.method = 'post'
+          const button = document.createElement('button')
+          button.type = 'submit'
+          button.className = 'btn'
+          button.textContent = `Sign in with ${label}`
+          form.appendChild(button)
+          container.appendChild(form)
         }
       } catch (err) {
         container.innerHTML = ''
