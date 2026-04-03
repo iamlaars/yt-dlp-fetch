@@ -1,5 +1,5 @@
 // tests/auth.test.js
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 describe('getActiveProviderNames', () => {
   it('returns github when GITHUB env vars are set', async () => {
