@@ -19,6 +19,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 COPY server.js .
+COPY auth.js .
 COPY public/ ./public/
 
 EXPOSE 4242
