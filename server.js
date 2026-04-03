@@ -29,7 +29,14 @@ app.use(cors())
 app.use(express.json())
 
 // Auth.js — handles /auth/signin, /auth/callback/:provider, /auth/signout
-app.use('/auth', ExpressAuth(authConfig))
+app.use('/auth', (req, res, next) => {
+  console.log('[auth]', req.method, req.path, 'host:', req.headers.host, 'proto:', req.headers['x-forwarded-proto'])
+  const handler = ExpressAuth(authConfig)
+  handler(req, res, (err) => {
+    if (err) console.error('[auth handler error]', err)
+    next(err)
+  })
+})
 
 // requireAuth — guards API routes and the main page
 async function requireAuth(req, res, next) {
