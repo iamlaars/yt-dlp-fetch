@@ -1,9 +1,12 @@
-const express = require('express');
-const cors = require('cors');
-const { spawn, execSync } = require('child_process');
-const path = require('path');
-const fs = require('fs');
-const os = require('os');
+import express from 'express'
+import cors from 'cors'
+import { spawn, execSync } from 'child_process'
+import path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const app = express();
 const PORT = 4242;
@@ -243,9 +246,13 @@ app.get('/api/file/:token', (req, res) => {
   fs.createReadStream(filePath).pipe(res);
 });
 
-app.listen(PORT, () => {
-  console.log(`\n🎬 FETCH running at http://localhost:${PORT}\n`);
-  const ytdlp = getYtDlpPath();
-  if (!ytdlp) { console.warn('⚠️  yt-dlp not found!'); return; }
-  try { console.log('✅ yt-dlp', execSync(`${ytdlp} --version`, { encoding: 'utf8' }).trim()); } catch {}
-});
+export { app }
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  app.listen(PORT, () => {
+    console.log(`\nFETCH running at http://localhost:${PORT}\n`)
+    const ytdlp = getYtDlpPath()
+    if (!ytdlp) { console.warn('WARNING: yt-dlp not found!'); return }
+    try { console.log('yt-dlp', execSync(`${ytdlp} --version`, { encoding: 'utf8' }).trim()) } catch {}
+  })
+}
