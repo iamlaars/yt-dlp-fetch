@@ -132,8 +132,10 @@
 
     // Show error from OAuth redirect if present
     const params = new URLSearchParams(window.location.search)
-    if (params.get('error')) {
-      document.getElementById('error').textContent = `Sign-in failed: ${params.get('error')}`
+    const rawError = params.get('error')
+    if (rawError) {
+      const safeError = rawError.slice(0, 80)
+      document.getElementById('error').textContent = `Sign-in failed: ${safeError}`
       document.getElementById('error').style.display = 'block'
     }
 
