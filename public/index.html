@@ -521,9 +521,52 @@
     letter-spacing: 0.1em;
   }
   .powered a { color: var(--muted); }
+
+  .user-bar {
+    position: fixed;
+    top: 1rem;
+    right: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    z-index: 100;
+  }
+
+  .user-bar img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid #333;
+  }
+
+  .user-bar span {
+    font-size: 0.8rem;
+    color: #aaa;
+  }
+
+  .user-bar a {
+    font-size: 0.8rem;
+    color: #666;
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #333;
+    border-radius: 4px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .user-bar a:hover {
+    color: #f0e040;
+    border-color: #f0e040;
+  }
 </style>
 </head>
 <body>
+
+  <div class="user-bar" id="user-bar" style="display:none">
+    <img id="user-avatar" src="" alt="avatar">
+    <span id="user-name"></span>
+    <a href="/auth/signout">Sign out</a>
+  </div>
 
 <header>
   <div class="logo">FETCH</div>
@@ -605,6 +648,25 @@
 <div class="toast" id="toast"></div>
 
 <script>
+    // Load and display current user session
+    async function loadSession() {
+      try {
+        const res = await fetch('/api/session')
+        if (!res.ok) return
+        const user = await res.json()
+        document.getElementById('user-name').textContent = user.name || user.email
+        if (user.image) {
+          document.getElementById('user-avatar').src = user.image
+          document.getElementById('user-avatar').style.display = 'block'
+        } else {
+          document.getElementById('user-avatar').style.display = 'none'
+        }
+        document.getElementById('user-bar').style.display = 'flex'
+      } catch {}
+    }
+
+    loadSession()
+
 const API = '';  // same origin
 
 let videoInfo = null;
