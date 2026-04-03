@@ -308,6 +308,12 @@ app.get('/api/file/:token', requireAuth, (req, res) => {
   fs.createReadStream(filePath).pipe(res);
 });
 
+// Log all unhandled errors so they appear in docker logs
+app.use((err, req, res, next) => {
+  console.error('[error]', req.method, req.originalUrl, err?.message ?? err)
+  if (!res.headersSent) res.status(500).json({ error: err?.message ?? 'Internal server error' })
+})
+
 export { app }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
