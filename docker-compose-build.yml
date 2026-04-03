@@ -9,6 +9,8 @@ services:
       - ./cookies.txt:/app/cookies.txt
     environment:
       - AUTH_SECRET=${AUTH_SECRET}
+      - AUTH_URL=${AUTH_URL:-}
+      - AUTH_TRUST_HOST=true
       - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-}
       - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
