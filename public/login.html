@@ -2,10 +2,142 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FETCH — Sign In</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d0d0d;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      color: #f0e040;
+      margin-bottom: 0.4rem;
+    }
+
+    .tagline {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #aaa;
+      margin-bottom: 1.5rem;
+    }
+
+    .providers {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: #252525;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .btn:hover {
+      background: #2e2e2e;
+      border-color: #f0e040;
+      color: #f0e040;
+    }
+
+    .error {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: #e05050;
+    }
+  </style>
 </head>
 <body>
-  <h1>Login</h1>
-  <p>Placeholder — replaced in Task 4.</p>
+  <div class="card">
+    <div class="logo">FETCH</div>
+    <p class="tagline">powered by yt-dlp · supports 1000+ sites</p>
+    <h2>Sign in to continue</h2>
+    <div class="providers" id="providers">
+      <p style="color:#555; font-size:0.85rem;">Loading providers...</p>
+    </div>
+    <p class="error" id="error" style="display:none"></p>
+  </div>
+
+  <script>
+    const providerNames = {
+      github: 'GitHub',
+      google: 'Google',
+      authentik: 'Authentik',
+    }
+
+    async function loadProviders() {
+      const container = document.getElementById('providers')
+      const errorEl = document.getElementById('error')
+
+      try {
+        const res = await fetch('/api/providers')
+        if (!res.ok) throw new Error('Failed to load providers')
+        const providers = await res.json()
+
+        if (providers.length === 0) {
+          container.innerHTML = '<p style="color:#e05050">No sign-in providers configured.</p>'
+          return
+        }
+
+        container.innerHTML = ''
+        for (const provider of providers) {
+          const label = providerNames[provider.id] || provider.name
+          const a = document.createElement('a')
+          a.className = 'btn'
+          a.href = `/auth/signin/${provider.id}`
+          a.textContent = `Sign in with ${label}`
+          container.appendChild(a)
+        }
+      } catch (err) {
+        container.innerHTML = ''
+        errorEl.textContent = 'Could not load sign-in options. Please refresh.'
+        errorEl.style.display = 'block'
+      }
+    }
+
+    // Show error from OAuth redirect if present
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('error')) {
+      document.getElementById('error').textContent = `Sign-in failed: ${params.get('error')}`
+      document.getElementById('error').style.display = 'block'
+    }
+
+    loadProviders()
+  </script>
 </body>
 </html>
