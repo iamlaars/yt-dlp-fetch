@@ -46,4 +46,8 @@ export function getActiveProviderNames() {
 export const authConfig = {
   providers: activeProviders,
   trustHost: true,
+  logger: {
+    error: (code, metadata) => console.error('[auth error]', code, metadata),
+    warn: (code) => console.warn('[auth warn]', code),
+  },
 }
