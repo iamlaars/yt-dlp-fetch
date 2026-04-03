@@ -4,16 +4,69 @@ import { spawn, execSync } from 'child_process'
 import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
+import { ExpressAuth, getSession } from '@auth/express'
+import { authConfig, getActiveProviderNames } from './auth.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
+if (!process.env.AUTH_SECRET) {
+  console.error('ERROR: AUTH_SECRET environment variable is required')
+  process.exit(1)
+}
+
+if (getActiveProviderNames().length === 0) {
+  console.error('ERROR: At least one OAuth provider must be configured (GITHUB_, GOOGLE_, or AUTHENTIK_ env vars)')
+  process.exit(1)
+}
+
 const app = express();
 const PORT = 4242;
 
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.set('trust proxy', true)
+
+app.use(cors())
+app.use(express.json())
+
+// Auth.js — handles /auth/signin, /auth/callback/:provider, /auth/signout
+app.use('/auth', ExpressAuth(authConfig))
+
+// requireAuth — guards API routes and the main page
+async function requireAuth(req, res, next) {
+  const session = await getSession(req, authConfig)
+  if (!session?.user) {
+    if (req.path.startsWith('/api/')) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+    return res.redirect('/login')
+  }
+  res.locals.session = session
+  next()
+}
+
+// Public: login page and its assets
+app.get('/login', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'))
+})
+
+// Public: list of configured providers (used by login.html)
+app.get('/api/providers', (_req, res) => {
+  res.json(getActiveProviderNames())
+})
+
+// Protected: session info
+app.get('/api/session', requireAuth, (req, res) => {
+  const { name, email, image } = res.locals.session.user
+  res.json({ name, email, image })
+})
+
+// Static assets (CSS, images, JS — not index.html)
+app.use(express.static(path.join(__dirname, 'public'), { index: false }))
+
+// Protected: main app page
+app.get('/', requireAuth, (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'))
+})
 
 // In-memory store: token -> { filePath, name, tmpDir }
 const fileStore = {};
@@ -26,7 +79,7 @@ function getYtDlpPath() {
 }
 
 // GET /api/test - verify yt-dlp spawning works from Express
-app.get('/api/test', (req, res) => {
+app.get('/api/test', requireAuth, (req, res) => {
   const ytdlp = getYtDlpPath();
   const url = req.query.url || 'https://www.youtube.com/watch?v=IHItbgHutVo';
   const args = ['--no-playlist', '--newline', '--progress', '--no-quiet', '--socket-timeout', '30',
@@ -47,7 +100,7 @@ app.get('/api/test', (req, res) => {
 });
 
 
-app.get('/api/info', (req, res) => {
+app.get('/api/info', requireAuth, (req, res) => {
   const { url } = req.query;
   if (!url) return res.status(400).json({ error: 'No URL provided' });
 
@@ -63,10 +116,19 @@ app.get('/api/info', (req, res) => {
     env: { ...process.env, PATH: '/usr/local/bin:/usr/bin:/bin', HOME: '/root' }
   });
   let out = '', err = '';
+  let responded = false;
   proc.stdout.on('data', d => out += d);
   proc.stderr.on('data', d => err += d);
 
+  proc.on('error', spawnErr => {
+    if (responded) return;
+    responded = true;
+    res.status(500).json({ error: `Failed to start yt-dlp: ${spawnErr.message}` });
+  });
+
   proc.on('close', code => {
+    if (responded) return;
+    responded = true;
     if (code !== 0) return res.status(400).json({ error: err.trim() || 'Failed to fetch info' });
     try {
       const info = JSON.parse(out);
@@ -100,7 +162,7 @@ app.get('/api/info', (req, res) => {
 });
 
 // POST /api/download  — SSE stream of progress, ends with { type:'done', token }
-app.post('/api/download', (req, res) => {
+app.post('/api/download', requireAuth, (req, res) => {
   const { url, format_id, audioOnly } = req.body;
   console.log('[download] request body:', JSON.stringify(req.body));
   if (!url) return res.status(400).json({ error: 'No URL provided' });
@@ -225,7 +287,7 @@ app.post('/api/download', (req, res) => {
 });
 
 // GET /api/file/:token  — serve the downloaded file
-app.get('/api/file/:token', (req, res) => {
+app.get('/api/file/:token', requireAuth, (req, res) => {
   const entry = fileStore[req.params.token];
   if (!entry) return res.status(404).json({ error: 'File not found or expired' });
 
