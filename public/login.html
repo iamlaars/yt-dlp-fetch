@@ -110,9 +110,13 @@
       const errorEl = document.getElementById('error')
 
       try {
-        const res = await fetch('/api/providers')
-        if (!res.ok) throw new Error('Failed to load providers')
-        const providers = await res.json()
+        const [providersRes, csrfRes] = await Promise.all([
+          fetch('/api/providers'),
+          fetch('/auth/csrf'),
+        ])
+        if (!providersRes.ok) throw new Error('Failed to load providers')
+        const providers = await providersRes.json()
+        const { csrfToken } = await csrfRes.json()
 
         if (providers.length === 0) {
           container.innerHTML = '<p style="color:#e05050">No sign-in providers configured.</p>'
@@ -125,10 +129,15 @@
           const form = document.createElement('form')
           form.action = `/auth/signin/${provider.id}`
           form.method = 'post'
+          const csrf = document.createElement('input')
+          csrf.type = 'hidden'
+          csrf.name = 'csrfToken'
+          csrf.value = csrfToken
           const button = document.createElement('button')
           button.type = 'submit'
           button.className = 'btn'
           button.textContent = `Sign in with ${label}`
+          form.appendChild(csrf)
           form.appendChild(button)
           container.appendChild(form)
         }
