@@ -6,10 +6,10 @@ services:
       - "4242:4242"
     volumes:
       - ./downloads:/app/downloads
-      # Cookies from webbrowser if needed
       - ./cookies.txt:/app/cookies.txt
     environment:
       - AUTH_SECRET=${AUTH_SECRET}
+      - AUTH_TRUST_HOST=${AUTH_TRUST_HOST:-false}
       - AUTH_URL=${AUTH_URL:-}
       - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-}
       - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-}

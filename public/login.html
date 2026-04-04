@@ -4,98 +4,212 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FETCH — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --bg: #0c0c0f;
+      --surface: #13131a;
+      --surface2: #1a1a24;
+      --border: #2a2a38;
+      --accent: #f0e040;
+      --accent2: #ff4d6d;
+      --text: #e8e8f0;
+      --muted: #6b6b88;
+      --mono: 'Space Mono', monospace;
+      --sans: 'Syne', sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+    }
+
     body {
-      background: #0d0d0d;
-      color: #e0e0e0;
-      font-family: 'Segoe UI', system-ui, sans-serif;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 24px 16px;
+      background-image:
+        radial-gradient(ellipse 60% 50% at 50% 0%, rgba(240,224,64,0.06) 0%, transparent 70%),
+        repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.012) 80px),
+        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.012) 80px);
     }
 
-    .card {
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
-      border-radius: 12px;
-      padding: 2.5rem 2rem;
+    .wrap {
       width: 100%;
-      max-width: 380px;
+      max-width: 360px;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo-area {
       text-align: center;
+      margin-bottom: 36px;
     }
 
     .logo {
-      font-size: 2rem;
+      font-family: var(--sans);
+      font-size: 64px;
       font-weight: 800;
-      letter-spacing: 0.15em;
-      color: #f0e040;
-      margin-bottom: 0.4rem;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--accent);
+      text-shadow: 0 0 48px rgba(240,224,64,0.2);
+    }
+
+    .logo-arrow {
+      display: block;
+      font-size: 26px;
+      color: var(--muted);
+      font-weight: 400;
+      margin-top: 2px;
     }
 
     .tagline {
-      font-size: 0.8rem;
-      color: #666;
-      margin-bottom: 2rem;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-top: 10px;
     }
 
-    h2 {
-      font-size: 1rem;
-      font-weight: 500;
-      color: #aaa;
-      margin-bottom: 1.5rem;
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .card-inner {
+      padding: 28px;
+    }
+
+    .card-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
     }
 
     .providers {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 10px;
     }
 
-    .providers form {
-      width: 100%;
-    }
+    .providers form { width: 100%; }
 
     .btn {
       display: block;
       width: 100%;
-      padding: 0.75rem 1rem;
-      background: #252525;
-      border: 1px solid #333;
-      border-radius: 8px;
-      color: #e0e0e0;
-      font-size: 0.95rem;
-      font-weight: 500;
-      text-decoration: none;
+      padding: 12px 18px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.15s, border-color 0.15s;
-      font-family: inherit;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      text-align: center;
+      letter-spacing: 0.01em;
     }
 
     .btn:hover {
-      background: #2e2e2e;
-      border-color: #f0e040;
-      color: #f0e040;
+      border-color: var(--accent);
+      background: rgba(240,224,64,0.05);
+      color: var(--accent);
     }
 
-    .error {
-      margin-top: 1rem;
-      font-size: 0.8rem;
-      color: #e05050;
+    .btn:active {
+      background: rgba(240,224,64,0.1);
     }
+
+    .loading-text {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .error-msg {
+      margin-top: 16px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent2);
+      background: rgba(255,77,109,0.06);
+      border: 1px solid rgba(255,77,109,0.2);
+      border-radius: 3px;
+      padding: 10px 12px;
+      display: none;
+      line-height: 1.5;
+    }
+
+    .footer {
+      margin-top: 20px;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .footer a { color: var(--muted); text-decoration: none; }
+    .footer a:hover { color: var(--accent); }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="logo">FETCH</div>
-    <p class="tagline">powered by yt-dlp · supports 1000+ sites</p>
-    <h2>Sign in to continue</h2>
-    <div class="providers" id="providers">
-      <p style="color:#555; font-size:0.85rem;">Loading providers...</p>
+  <div class="wrap">
+    <div class="logo-area">
+      <div class="logo">FETCH<span class="logo-arrow">↓</span></div>
+      <div class="tagline">powered by yt-dlp · 1000+ sites</div>
     </div>
-    <p class="error" id="error" style="display:none"></p>
+
+    <div class="card">
+      <div class="card-inner">
+        <div class="card-label">Sign in to continue</div>
+        <div class="providers" id="providers">
+          <p class="loading-text">Loading...</p>
+        </div>
+        <div class="error-msg" id="error"></div>
+      </div>
+    </div>
+
+    <div class="footer">self-hosted · <a href="https://github.com/yt-dlp/yt-dlp" target="_blank">yt-dlp</a></div>
   </div>
 
   <script>
@@ -119,7 +233,7 @@
         const { csrfToken } = await csrfRes.json()
 
         if (providers.length === 0) {
-          container.innerHTML = '<p style="color:#e05050">No sign-in providers configured.</p>'
+          container.innerHTML = '<p class="loading-text" style="color:var(--accent2)">No sign-in providers configured.</p>'
           return
         }
 
@@ -152,9 +266,9 @@
     const params = new URLSearchParams(window.location.search)
     const rawError = params.get('error')
     if (rawError) {
-      const safeError = rawError.slice(0, 80)
-      document.getElementById('error').textContent = `Sign-in failed: ${safeError}`
-      document.getElementById('error').style.display = 'block'
+      const errorEl = document.getElementById('error')
+      errorEl.textContent = `Sign-in failed: ${rawError.slice(0, 80)}`
+      errorEl.style.display = 'block'
     }
 
     loadProviders()

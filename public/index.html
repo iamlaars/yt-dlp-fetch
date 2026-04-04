@@ -37,32 +37,76 @@
     align-items: center;
     padding: 40px 16px 80px;
     background-image:
-      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(240,224,64,0.07) 0%, transparent 70%),
-      repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.015) 80px),
-      repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.015) 80px);
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(240,224,64,0.06) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.012) 80px),
+      repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.012) 80px);
+  }
+
+  /* User bar */
+  .user-bar {
+    position: fixed;
+    top: 14px;
+    right: 16px;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    z-index: 100;
+  }
+
+  .user-bar img {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+  }
+
+  .user-bar .user-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .user-bar a {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    letter-spacing: 0.08em;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .user-bar a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
   }
 
   /* Header */
   header {
     text-align: center;
-    margin-bottom: 48px;
-    position: relative;
+    margin-bottom: 40px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   .logo {
-    font-size: clamp(52px, 10vw, 88px);
+    font-size: clamp(52px, 10vw, 84px);
     font-weight: 800;
     letter-spacing: -0.04em;
     line-height: 1;
     color: var(--accent);
-    text-shadow: 0 0 60px rgba(240,224,64,0.25);
-    position: relative;
+    text-shadow: 0 0 56px rgba(240,224,64,0.2);
   }
 
-  .logo::after {
-    content: '↓';
+  .logo-arrow {
     display: block;
-    font-size: 0.45em;
+    font-size: 0.44em;
     letter-spacing: 0.1em;
     color: var(--muted);
     font-weight: 400;
@@ -71,9 +115,9 @@
 
   .tagline {
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 10px;
     color: var(--muted);
-    letter-spacing: 0.2em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     margin-top: 10px;
   }
@@ -87,6 +131,7 @@
     border-radius: 4px;
     overflow: hidden;
     position: relative;
+    animation: fadeUp 0.4s 0.08s ease both;
   }
 
   .card::before {
@@ -97,15 +142,15 @@
     background: linear-gradient(90deg, transparent, var(--accent), transparent);
   }
 
-  /* URL Input section */
+  /* URL section */
   .url-section {
-    padding: 28px 28px 24px;
+    padding: 26px 28px 22px;
   }
 
   .input-label {
     font-family: var(--mono);
     font-size: 10px;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.18em;
     color: var(--muted);
     text-transform: uppercase;
     margin-bottom: 10px;
@@ -122,37 +167,38 @@
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 3px;
-    padding: 13px 16px;
+    padding: 12px 14px;
     font-family: var(--mono);
     font-size: 13px;
     color: var(--text);
     outline: none;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
 
   .url-input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(240,224,64,0.08);
+    box-shadow: 0 0 0 3px rgba(240,224,64,0.07);
   }
 
   .url-input::placeholder { color: var(--muted); }
 
+  /* Buttons */
   .btn {
     background: var(--accent);
     color: #0c0c0f;
     border: none;
     border-radius: 3px;
-    padding: 13px 20px;
+    padding: 12px 20px;
     font-family: var(--sans);
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
     white-space: nowrap;
-    transition: all 0.15s;
+    transition: background 0.15s, transform 0.15s;
     letter-spacing: 0.02em;
   }
 
-  .btn:hover { background: #fff0a0; transform: translateY(-1px); }
+  .btn:hover { background: #f8ef70; transform: translateY(-1px); }
   .btn:active { transform: translateY(0); }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
@@ -163,7 +209,12 @@
     font-family: var(--mono);
     font-size: 11px;
   }
-  .btn-ghost:hover { background: var(--surface2); border-color: var(--accent); transform: none; }
+  .btn-ghost:hover {
+    background: var(--surface2);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: none;
+  }
 
   /* Divider */
   .divider {
@@ -177,13 +228,12 @@
     padding: 24px 28px;
     display: none;
   }
-
   .info-section.visible { display: block; }
 
   .video-meta {
     display: flex;
     gap: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
   }
 
   .thumbnail {
@@ -199,10 +249,10 @@
   .meta-text { flex: 1; min-width: 0; }
 
   .video-title {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
-    line-height: 1.3;
-    margin-bottom: 6px;
+    line-height: 1.35;
+    margin-bottom: 8px;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -218,13 +268,23 @@
     gap: 12px;
   }
 
-  .meta-details span { display: flex; align-items: center; gap: 4px; }
+  .meta-details span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
 
-  /* Format picker */
+  .meta-icon {
+    font-size: 9px;
+    color: var(--border);
+    letter-spacing: 0;
+  }
+
+  /* Section label */
   .section-label {
     font-family: var(--mono);
     font-size: 10px;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.18em;
     color: var(--muted);
     text-transform: uppercase;
     margin-bottom: 12px;
@@ -240,6 +300,7 @@
     background: var(--border);
   }
 
+  /* Quick options */
   .quick-options {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -251,18 +312,21 @@
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 3px;
-    padding: 10px;
+    padding: 11px 10px;
     text-align: center;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: border-color 0.15s, background 0.15s;
     font-family: var(--mono);
   }
 
-  .quick-btn:hover { border-color: var(--accent); background: rgba(240,224,64,0.05); }
+  .quick-btn:hover {
+    border-color: var(--accent);
+    background: rgba(240,224,64,0.04);
+  }
 
   .quick-btn.selected {
     border-color: var(--accent);
-    background: rgba(240,224,64,0.1);
+    background: rgba(240,224,64,0.08);
   }
 
   .qb-label {
@@ -276,7 +340,8 @@
     font-size: 9px;
     color: var(--muted);
     display: block;
-    margin-top: 2px;
+    margin-top: 3px;
+    letter-spacing: 0.04em;
   }
 
   /* Formats table */
@@ -288,18 +353,21 @@
     background: none;
     border: none;
     padding: 0;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     text-decoration: underline;
     text-underline-offset: 3px;
     margin-bottom: 8px;
     display: block;
+    transition: color 0.15s;
   }
+
+  .formats-toggle:hover { color: var(--text); }
 
   .formats-table-wrap {
     display: none;
     overflow-x: hidden;
     overflow-y: auto;
-    max-height: 260px;
+    max-height: 240px;
     border: 1px solid var(--border);
     border-radius: 3px;
     margin-bottom: 16px;
@@ -307,10 +375,9 @@
     scrollbar-color: var(--border) transparent;
   }
 
-  .formats-table-wrap::-webkit-scrollbar { width: 6px; }
+  .formats-table-wrap::-webkit-scrollbar { width: 4px; }
   .formats-table-wrap::-webkit-scrollbar-track { background: transparent; }
-  .formats-table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  .formats-table-wrap::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+  .formats-table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
   .formats-table thead th {
     position: sticky;
@@ -331,9 +398,9 @@
     background: var(--surface2);
     color: var(--muted);
     text-align: left;
-    padding: 8px 10px;
+    padding: 7px 10px;
     font-size: 9px;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     border-bottom: 1px solid var(--border);
   }
@@ -346,107 +413,60 @@
   }
 
   .formats-table tr:last-child td { border-bottom: none; }
-
   .formats-table tr { cursor: pointer; transition: background 0.1s; }
   .formats-table tr:hover td { background: var(--surface2); }
-  .formats-table tr.selected td { background: rgba(240,224,64,0.07); }
-  .formats-table tr.selected td:first-child { border-left: 2px solid var(--accent); }
+  .formats-table tr.selected td { background: rgba(240,224,64,0.06); }
+  .formats-table tr.selected td:first-child { border-left: 2px solid var(--accent); padding-left: 8px; }
 
   .badge {
     display: inline-block;
     font-size: 8px;
-    padding: 1px 5px;
+    padding: 2px 5px;
     border-radius: 2px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     font-weight: 700;
   }
 
-  .badge-v { background: rgba(63,199,255,0.15); color: #3fc7ff; }
-  .badge-a { background: rgba(61,250,173,0.15); color: var(--success); }
-  .badge-va { background: rgba(240,224,64,0.15); color: var(--accent); }
+  .badge-v  { background: rgba(63,199,255,0.12); color: #3fc7ff; }
+  .badge-a  { background: rgba(61,250,173,0.12); color: var(--success); }
+  .badge-va { background: rgba(240,224,64,0.12); color: var(--accent); }
 
   /* Download section */
   .dl-section {
     padding: 0 28px 28px;
     display: none;
   }
-
   .dl-section.visible { display: block; }
 
   .dl-btn {
     width: 100%;
-    padding: 16px;
-    font-size: 15px;
+    padding: 15px;
+    font-size: 14px;
     border-radius: 3px;
     position: relative;
     overflow: hidden;
+    letter-spacing: 0.04em;
   }
 
   .dl-btn::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%);
     transform: translateX(-100%);
-    transition: transform 0.6s;
+    transition: transform 0.55s;
   }
 
-  .dl-btn:hover::before { transform: translateX(100%); }
+  .dl-btn:not(:disabled):hover::before { transform: translateX(100%); }
 
   /* Progress */
   .progress-section {
     padding: 0 28px 28px;
     display: none;
   }
-
   .progress-section.visible { display: block; }
 
-  .progress-bar-wrap {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    height: 4px;
-    margin-bottom: 12px;
-    overflow: hidden;
-  }
-
-  .progress-bar {
-    height: 100%;
-    background: var(--accent);
-    width: 0%;
-    transition: width 0.3s;
-    box-shadow: 0 0 8px rgba(240,224,64,0.5);
-  }
-
-  .progress-bar.indeterminate {
-    width: 30%;
-    animation: indeterminate 1.5s ease-in-out infinite;
-  }
-
-  @keyframes indeterminate {
-    0% { transform: translateX(-150%); }
-    100% { transform: translateX(450%); }
-  }
-
-  .log-box {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 12px;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    max-height: 120px;
-    overflow-y: auto;
-    line-height: 1.6;
-  }
-
-  .log-box .log-line { margin-bottom: 2px; }
-  .log-box .log-line.success { color: var(--success); }
-  .log-box .log-line.error { color: var(--accent2); }
-
-  /* Status */
   .status {
     font-family: var(--mono);
     font-size: 11px;
@@ -467,42 +487,163 @@
 
   @keyframes pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.8); }
+    50%       { opacity: 0.35; transform: scale(0.75); }
   }
 
-  /* Loader spinner */
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    height: 3px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.3s;
+    box-shadow: 0 0 8px rgba(240,224,64,0.45);
+  }
+
+  .progress-bar.indeterminate {
+    width: 30%;
+    animation: indeterminate 1.5s ease-in-out infinite;
+  }
+
+  @keyframes indeterminate {
+    0%   { transform: translateX(-150%); }
+    100% { transform: translateX(450%); }
+  }
+
+  .log-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 10px 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    max-height: 110px;
+    overflow-y: auto;
+    line-height: 1.65;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .log-box::-webkit-scrollbar { width: 4px; }
+  .log-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .log-box .log-line.success { color: var(--success); }
+  .log-box .log-line.error   { color: var(--accent2); }
+
+  /* Spinner */
   .spinner {
-    width: 18px; height: 18px;
+    width: 16px; height: 16px;
     border: 2px solid var(--border);
     border-top-color: var(--accent);
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: spin 0.75s linear infinite;
     display: inline-block;
     vertical-align: middle;
   }
 
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* Sign-out modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(12,12,15,0.8);
+    backdrop-filter: blur(2px);
+    z-index: 150;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .modal-backdrop.show { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    width: 100%;
+    max-width: 320px;
+    position: relative;
+    animation: fadeUp 0.2s ease both;
+  }
+
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+  }
+
+  .modal-inner {
+    padding: 24px 24px 20px;
+  }
+
+  .modal-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .modal-body {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    line-height: 1.4;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
   /* Toast */
   .toast {
     position: fixed;
-    bottom: 24px;
+    bottom: 20px;
     left: 50%;
-    transform: translateX(-50%) translateY(80px);
+    transform: translateX(-50%) translateY(72px);
     background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 12px 20px;
+    border-radius: 3px;
+    padding: 10px 18px;
     font-family: var(--mono);
-    font-size: 12px;
-    z-index: 100;
-    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    font-size: 11px;
+    z-index: 200;
+    transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
     white-space: nowrap;
+    letter-spacing: 0.04em;
   }
 
-  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.show    { transform: translateX(-50%) translateY(0); }
   .toast.success { border-color: var(--success); color: var(--success); }
-  .toast.error { border-color: var(--accent2); color: var(--accent2); }
+  .toast.error   { border-color: var(--accent2); color: var(--accent2); }
+
+  /* Footer */
+  .powered {
+    margin-top: 28px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    letter-spacing: 0.08em;
+    animation: fadeUp 0.4s 0.16s ease both;
+  }
+  .powered a { color: var(--muted); text-decoration: none; }
+  .powered a:hover { color: var(--accent); }
 
   /* Responsive */
   @media (max-width: 500px) {
@@ -510,66 +651,20 @@
     .video-meta { flex-direction: column; }
     .thumbnail { width: 100%; height: 160px; }
     .quick-options { grid-template-columns: 1fr 1fr; }
-  }
-
-  .powered {
-    margin-top: 32px;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    text-align: center;
-    letter-spacing: 0.1em;
-  }
-  .powered a { color: var(--muted); }
-
-  .user-bar {
-    position: fixed;
-    top: 1rem;
-    right: 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    z-index: 100;
-  }
-
-  .user-bar img {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 1px solid #333;
-  }
-
-  .user-bar span {
-    font-size: 0.8rem;
-    color: #aaa;
-  }
-
-  .user-bar a {
-    font-size: 0.8rem;
-    color: #666;
-    text-decoration: none;
-    padding: 0.25rem 0.5rem;
-    border: 1px solid #333;
-    border-radius: 4px;
-    transition: color 0.15s, border-color 0.15s;
-  }
-
-  .user-bar a:hover {
-    color: #f0e040;
-    border-color: #f0e040;
+    .user-bar .user-name { display: none; }
   }
 </style>
 </head>
 <body>
 
-  <div class="user-bar" id="user-bar" style="display:none">
-    <img id="user-avatar" src="" alt="avatar">
-    <span id="user-name"></span>
-    <a href="/auth/signout">Sign out</a>
-  </div>
+<div class="user-bar" id="user-bar">
+  <img id="user-avatar" src="" alt="" style="display:none">
+  <span class="user-name" id="user-name"></span>
+  <a href="#" onclick="signOut(event)">Sign out</a>
+</div>
 
 <header>
-  <div class="logo">FETCH</div>
+  <div class="logo">FETCH<span class="logo-arrow">↓</span></div>
   <p class="tagline">powered by yt-dlp · supports 1000+ sites</p>
 </header>
 
@@ -588,7 +683,7 @@
   <!-- Video info -->
   <div class="info-section" id="infoSection">
     <div class="video-meta">
-      <img class="thumbnail" id="thumbnail" src="" alt="">
+      <img class="thumbnail" id="thumbnail" src="" alt="" style="display:none">
       <div class="meta-text">
         <div class="video-title" id="videoTitle">—</div>
         <div class="meta-details" id="metaDetails"></div>
@@ -618,7 +713,7 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Extension</th>
+            <th>Ext</th>
             <th>Resolution</th>
             <th>Type</th>
             <th>Note</th>
@@ -637,7 +732,7 @@
 
   <!-- Progress -->
   <div class="progress-section" id="progressSection">
-    <div class="status" id="statusText"><span class="dot"></span> <span id="statusMsg">Preparing...</span></div>
+    <div class="status"><span class="dot"></span><span id="statusMsg">Preparing...</span></div>
     <div class="progress-bar-wrap"><div class="progress-bar indeterminate" id="progressBar"></div></div>
     <div class="log-box" id="logBox"></div>
   </div>
@@ -645,30 +740,67 @@
 
 <div class="powered">runs on <a href="https://github.com/yt-dlp/yt-dlp" target="_blank">yt-dlp</a> · self-hosted</div>
 
+<div class="modal-backdrop" id="signoutModal">
+  <div class="modal">
+    <div class="modal-inner">
+      <div class="modal-label">Confirm</div>
+      <div class="modal-body">Sign out of FETCH?</div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeSignOut()">Cancel</button>
+        <button class="btn" id="confirmSignOutBtn" onclick="doSignOut()">Sign out</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-    // Load and display current user session
-    async function loadSession() {
-      try {
-        const res = await fetch('/api/session')
-        if (!res.ok) return
-        const user = await res.json()
-        document.getElementById('user-name').textContent = user.name || user.email
-        if (user.image) {
-          document.getElementById('user-avatar').src = user.image
-          document.getElementById('user-avatar').style.display = 'block'
-        } else {
-          document.getElementById('user-avatar').style.display = 'none'
-        }
-        document.getElementById('user-bar').style.display = 'flex'
-      } catch {}
-    }
+function signOut(e) {
+  e.preventDefault()
+  document.getElementById('signoutModal').classList.add('show')
+}
 
-    loadSession()
+function closeSignOut() {
+  document.getElementById('signoutModal').classList.remove('show')
+}
 
-const API = '';  // same origin
+async function doSignOut() {
+  const btn = document.getElementById('confirmSignOutBtn')
+  btn.disabled = true
+  btn.textContent = 'Signing out...'
+  try {
+    const res = await fetch('/auth/csrf')
+    const { csrfToken } = await res.json()
+    const form = document.createElement('form')
+    form.method = 'post'
+    form.action = '/auth/signout'
+    const input = document.createElement('input')
+    input.type = 'hidden'
+    input.name = 'csrfToken'
+    input.value = csrfToken
+    form.appendChild(input)
+    document.body.appendChild(form)
+    form.submit()
+  } catch {
+    window.location.href = '/auth/signout'
+  }
+}
 
+async function loadSession() {
+  try {
+    const res = await fetch('/api/session')
+    if (!res.ok) return
+    const user = await res.json()
+    document.getElementById('user-name').textContent = user.name || user.email
+    const avatar = document.getElementById('user-avatar')
+    if (user.image) { avatar.src = user.image; avatar.style.display = 'block'; }
+    document.getElementById('user-bar').style.display = 'flex'
+  } catch {}
+}
+loadSession()
+
+const API = '';
 let videoInfo = null;
 let selectedMode = 'best';
 let selectedFormatId = null;
@@ -709,7 +841,6 @@ async function fetchInfo() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>';
 
-  // Hide previous results
   document.getElementById('infoSection').classList.remove('visible');
   document.getElementById('dlSection').classList.remove('visible');
   document.getElementById('progressSection').classList.remove('visible');
@@ -717,12 +848,9 @@ async function fetchInfo() {
   try {
     const res = await fetch(`${API}/api/info?url=${encodeURIComponent(url)}`);
     const data = await res.json();
-
     if (!res.ok) throw new Error(data.error || 'Failed');
-
     videoInfo = data;
     renderInfo(data);
-
     document.getElementById('infoSection').classList.add('visible');
     document.getElementById('dlSection').classList.add('visible');
   } catch (e) {
@@ -742,12 +870,11 @@ function renderInfo(data) {
 
   const det = document.getElementById('metaDetails');
   det.innerHTML = [
-    data.uploader ? `<span>👤 ${data.uploader}</span>` : '',
-    data.duration ? `<span>⏱ ${formatDuration(data.duration)}</span>` : '',
-    data.view_count ? `<span>👁 ${formatViews(data.view_count)}</span>` : '',
+    data.uploader   ? `<span><span class="meta-icon">BY</span>${data.uploader}</span>` : '',
+    data.duration   ? `<span><span class="meta-icon">T</span>${formatDuration(data.duration)}</span>` : '',
+    data.view_count ? `<span><span class="meta-icon">V</span>${formatViews(data.view_count)}</span>` : '',
   ].filter(Boolean).join('');
 
-  // Render format rows
   const tbody = document.getElementById('formatRows');
   tbody.innerHTML = '';
   (data.formats || []).forEach(f => {
@@ -756,8 +883,8 @@ function renderInfo(data) {
 
     let badge = '';
     if (f.hasVideo && f.hasAudio) badge = '<span class="badge badge-va">V+A</span>';
-    else if (f.hasVideo) badge = '<span class="badge badge-v">Video</span>';
-    else badge = '<span class="badge badge-a">Audio</span>';
+    else if (f.hasVideo)          badge = '<span class="badge badge-v">Video</span>';
+    else                          badge = '<span class="badge badge-a">Audio</span>';
 
     tr.innerHTML = `
       <td>${f.format_id}</td>
@@ -767,7 +894,6 @@ function renderInfo(data) {
       <td>${f.format_note || '—'}</td>
       <td>${formatSize(f.filesize)}</td>
     `;
-
     tr.onclick = () => selectFormat(tr, f.format_id);
     tbody.appendChild(tr);
   });
@@ -778,7 +904,6 @@ function selectQuick(el, mode) {
   el.classList.add('selected');
   selectedMode = mode;
   selectedFormatId = null;
-  // Deselect table rows
   document.querySelectorAll('#formatRows tr').forEach(r => r.classList.remove('selected'));
 }
 
@@ -800,9 +925,7 @@ function startDownload() {
   const url = document.getElementById('urlInput').value.trim();
   if (!url || !videoInfo) return;
 
-  // Build request body
   const body = { url };
-
   if (selectedMode === 'audio') {
     body.audioOnly = true;
   } else if (selectedMode === '1080') {
@@ -810,8 +933,6 @@ function startDownload() {
   } else if (selectedMode === 'custom' && selectedFormatId) {
     body.format_id = selectedFormatId;
   }
-  // 'best' sends nothing — server uses bestvideo+bestaudio/best
-
   body.filename = videoInfo.title;
 
   document.getElementById('dlSection').classList.remove('visible');
@@ -855,11 +976,10 @@ function startDownload() {
             const event = JSON.parse(line.slice(5).trim());
             if (event.type === 'progress') {
               log(event.message);
-              // Update status bar text with any meaningful line
               const msg = event.message.trim();
               if (msg && !msg.startsWith(':')) {
-                const eta = msg.match(/ETA\s+(\S+)/);
                 const pct = msg.match(/(\d+(?:\.\d+)?)%/);
+                const eta = msg.match(/ETA\s+(\S+)/);
                 if (pct) {
                   bar.classList.remove('indeterminate');
                   bar.style.width = parseFloat(pct[1]) + '%';
@@ -875,7 +995,6 @@ function startDownload() {
               bar.style.width = '100%';
               statusMsg.textContent = 'Done! Saving file...';
               log('✓ ' + (event.filename || 'file'), 'success');
-              // Trigger browser file download via the token URL
               window.location.href = `${API}/api/file/${event.token}`;
               setTimeout(() => {
                 document.getElementById('progressSection').classList.remove('visible');
@@ -885,7 +1004,7 @@ function startDownload() {
               }, 1500);
             } else if (event.type === 'error') {
               log('✗ ' + event.message, 'error');
-              statusMsg.textContent = 'Error — check logs above';
+              statusMsg.textContent = 'Error — check log above';
               bar.classList.remove('indeterminate');
               bar.style.width = '0%';
               setTimeout(() => {
@@ -909,13 +1028,19 @@ function startDownload() {
   });
 }
 
-// Handle enter key
+document.getElementById('signoutModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeSignOut()
+})
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSignOut()
+})
+
 document.getElementById('urlInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') fetchInfo();
 });
 
-// Handle paste and auto-fetch
-document.getElementById('urlInput').addEventListener('paste', e => {
+document.getElementById('urlInput').addEventListener('paste', () => {
   setTimeout(() => {
     const val = document.getElementById('urlInput').value.trim();
     if (val.startsWith('http')) fetchInfo();

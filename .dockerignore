@@ -1,5 +1,23 @@
-node_modules
-downloads
-*.zip
-.git
+# Dependencies (installed in image via npm ci)
+node_modules/
+
+# Runtime data (mounted as volumes)
+downloads/
 cookies.txt
+
+# Dev / environment
+.env
+.env.*
+
+# Git
+.git/
+.gitignore
+
+# Docs / config not needed in image
+README.md
+.claude/
+*.zip
+
+# Test files
+tests/
+vitest.config.js

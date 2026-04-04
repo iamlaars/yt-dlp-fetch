@@ -6,6 +6,7 @@ import fs from 'fs'
 import { fileURLToPath } from 'url'
 import { ExpressAuth, getSession } from '@auth/express'
 import { authConfig, getActiveProviderNames } from './auth.js'
+import { sanitizeUrl, isPlaylistUrl, parseYtDlpJson, startScheduledYtDlpUpdate } from './ytdlp.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -108,16 +109,19 @@ app.get('/api/test', requireAuth, (req, res) => {
 
 
 app.get('/api/info', requireAuth, (req, res) => {
-  const { url } = req.query;
+  const url = sanitizeUrl(req.query.url);
   if (!url) return res.status(400).json({ error: 'No URL provided' });
+  if (isPlaylistUrl(url)) return res.status(400).json({ error: 'Playlist URLs are not supported. Use a direct video URL.' });
 
   const ytdlp = getYtDlpPath();
   if (!ytdlp) return res.status(500).json({ error: 'yt-dlp not found in container' });
 
   const cookiesPath = '/app/cookies.txt';
-  const infoArgs = ['--dump-json', '--no-playlist', '--no-warnings', '--socket-timeout', '30'];
-  if (fs.existsSync(cookiesPath)) infoArgs.push('--cookies', cookiesPath);
+  const infoArgs = ['--ignore-config', '--dump-json', '--no-playlist', '--no-warnings', '--socket-timeout', '30', '--js-runtimes', 'node'];
+  if (fs.existsSync(cookiesPath) && fs.statSync(cookiesPath).size > 0) infoArgs.push('--cookies', cookiesPath);
   infoArgs.push(url);
+
+  console.log('[info] args:', infoArgs.join(' '));
 
   const proc = spawn(ytdlp, infoArgs, {
     env: { ...process.env, PATH: '/usr/local/bin:/usr/bin:/bin', HOME: '/root' }
@@ -136,9 +140,10 @@ app.get('/api/info', requireAuth, (req, res) => {
   proc.on('close', code => {
     if (responded) return;
     responded = true;
+    console.log('[info] exit code:', code, '| stderr:', err.trim().slice(0, 300));
     if (code !== 0) return res.status(400).json({ error: err.trim() || 'Failed to fetch info' });
     try {
-      const info = JSON.parse(out);
+      const info = parseYtDlpJson(out);
       const formats = (info.formats || [])
         .filter(f => f.ext && (f.vcodec !== 'none' || f.acodec !== 'none'))
         .map(f => ({
@@ -170,7 +175,8 @@ app.get('/api/info', requireAuth, (req, res) => {
 
 // POST /api/download  — SSE stream of progress, ends with { type:'done', token }
 app.post('/api/download', requireAuth, (req, res) => {
-  const { url, format_id, audioOnly } = req.body;
+  const { format_id, audioOnly } = req.body;
+  const url = sanitizeUrl(req.body.url);
   console.log('[download] request body:', JSON.stringify(req.body));
   if (!url) return res.status(400).json({ error: 'No URL provided' });
 
@@ -183,24 +189,22 @@ app.post('/api/download', requireAuth, (req, res) => {
   const outTemplate = path.join(tmpDir, '%(title)s.%(ext)s');
 
   const args = [
-    '--no-playlist', '--newline', '--progress', '--no-quiet',
-    '--socket-timeout', '30',
-    '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    '--ignore-config', '--no-playlist', '--newline', '--progress', '--no-quiet',
+    '--socket-timeout', '30', '--js-runtimes', 'node',
     '-o', outTemplate,
   ];
 
   const cookiesPath = '/app/cookies.txt';
-  if (fs.existsSync(cookiesPath)) {
-    args.push('--cookies', cookiesPath, '--no-write-subs');
-    console.log('[download] Using cookies.txt');
-  } else {
-    console.log('[download] No cookies.txt found at', cookiesPath);
-  }
+  if (fs.existsSync(cookiesPath) && fs.statSync(cookiesPath).size > 0) args.push('--cookies', cookiesPath);
 
   if (audioOnly) {
     args.push('-x', '--audio-format', 'mp3');
   } else if (format_id) {
-    args.push('-f', `${format_id}+bestaudio/bestvideo+bestaudio/best`, '--merge-output-format', 'mp4');
+    // Preset selectors (e.g. 1080p) are already complete format strings; numeric IDs need audio merged in
+    const fmtArg = /^\d+$/.test(format_id)
+      ? `${format_id}+bestaudio/${format_id}`
+      : format_id;
+    args.push('-f', fmtArg, '--merge-output-format', 'mp4');
   } else {
     args.push('-f', 'bestvideo+bestaudio/best', '--merge-output-format', 'mp4');
   }
@@ -329,5 +333,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const ytdlp = getYtDlpPath()
     if (!ytdlp) { console.warn('WARNING: yt-dlp not found!'); return }
     try { console.log('yt-dlp', execSync(`${ytdlp} --version`, { encoding: 'utf8' }).trim()) } catch {}
+    startScheduledYtDlpUpdate(ytdlp)
   })
 }

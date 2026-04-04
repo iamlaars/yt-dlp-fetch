@@ -1,2 +1,18 @@
+# Dependencies
+node_modules/
+
+# Runtime data
+downloads/
+.env
+
+# Secrets / user data
 cookies.txt
-downloads
+
+# Claude
+.claude/
+CLAUDE.md
+
+# Editor / OS
+.DS_Store
+*.swp
+*.swo

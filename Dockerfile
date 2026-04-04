@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# Install yt-dlp with jsinterp extras and symlink node into /usr/bin so yt-dlp's hardcoded PATH can find it
+# Install yt-dlp with default deps (includes EJS scripts) and symlink node for n-challenge solving
 RUN pip3 install "yt-dlp[default]" --break-system-packages \
   && ln -sf /usr/local/bin/node /usr/bin/node
 
@@ -20,6 +20,7 @@ RUN npm ci --omit=dev
 
 COPY server.js .
 COPY auth.js .
+COPY ytdlp.js .
 COPY public/ ./public/
 
 EXPOSE 4242
